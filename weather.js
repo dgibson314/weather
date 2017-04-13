@@ -8,12 +8,23 @@ function fahrToCelsius(temp) {
     return Math.round((temp - 32) / 1.8);
 }
 
+/*
 function getPosition() {
     var url = "http://ip-api.com/json";
     $.getJSON(url, function(pos) {
         getWeather(pos);
     });
 }
+*/
+
+function getPosition() {
+    if (navigator.geolocation) {
+       navigator.geolocation.getCurrentPosition(getWeather);
+    }
+    else {
+       $("#location").html("Geolocation not supported. Sorry :(");
+    }
+} 
 
 function getWeather(pos) {
     var lat = pos.lat;
@@ -99,5 +110,4 @@ $(document).ready(function() {
 			$("#unit").html('&#8457');
 		}
 	});
-	
 });
