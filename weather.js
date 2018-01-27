@@ -1,113 +1,91 @@
-var key = "bce905ae4154f415fe521760666c09b2";
-
 function celsiusToFahr(temp) {
-    return Math.round((temp * 1.8) + 32);
+    return (temp * 1.8) + 32;
 }
 
 function fahrToCelsius(temp) {
-    return Math.round((temp - 32) / 1.8);
+    return (temp - 32) / 1.8;
 }
 
-/*
-function getPosition() {
-    var url = "http://ip-api.com/json";
-    $.getJSON(url, function(pos) {
-        getWeather(pos);
-    });
-}
-*/
+function updateWeather(pos) {
+    var latitude = pos.coords.latitude;
+    var longitude = pos.coords.longitude;
 
-function getPosition() {
-    if (navigator.geolocation) {
-       navigator.geolocation.getCurrentPosition(getWeather);
-    }
-    else {
-       $("#location").html("Geolocation not supported. Sorry :(");
-    }
-} 
-
-function getWeather(pos) {
-    var lat = pos.lat;
-    var lon = pos.lon;
-    var url = "http://api.openweathermap.org/data/2.5/weather?lat="+lat+"&lon="+lon+"&appid="+key;
+    var url = "https://fcc-weather-api.glitch.me/api/current?lat=" +
+        latitude + "&lon=" + longitude;
     $.getJSON(url, function(weather) {
-        displayWeather(weather);
+        var description = weather.weather[0].description;
+        // TODO: this seems like it's inaccurate sometimes, should look
+        // into another location API
+        var city = weather.name;
+        var ctemp = Math.round(weather.main.temp);
+
+        // TODO: add country data from JSON?
+        $("#location").html("Somewhere near " + city + ", US");
+        $("#temp").html(ctemp);
+        $("#description").html(description);
+
+        var weather_code = weather.weather[0].id;
+        updateBackground(weather_code);
     });
 }
 
-function displayWeather(weather) {
-    var city = weather.name;
-    var country = weather.sys.country;
-    var temp = Math.round(weather.main.temp);
-    var ftemp = celsiusToFahr(temp - 273);
-    var description = weather.weather[0].description;
-    var weather_code = weather.weather[0].id;
-
-    backgroundColor(weather_code);
-    $("#location").html("Somewhere near " + city + ", " + country);
-    $("#temp").html(ftemp);
-    $("#description").html(description);
-}
-
-function backgroundColor(code) {
+function updateBackground(code) {
     switch (Math.floor(code/100)) {
-        /* Thunderstorm */
+        // Thunderstorm
         case 2:
-			$("body").css({"background-color":"#ff0000"});
-			if (code < 210 || code >= 230) {
-				$("#icon").html("<i class='wi wi-storm-showers'></i>");
-			}
-			else {
-				$("#icon").html("<i class='wi wi-thunderstorm'></i>");
-			}
-			break;
-		/* Drizzle and Rain */
-		case 3:
-		case 5:
-			$("body").css({"background-color": "#666699"});
-			$("#icon").html("<i class='wi wi-showers'></i>");
-			break;
-		/* Snow */
-		case 6:
-			$("body").css({"background-color": "#669999"});
-			$("#icon").html("<i class='wi wi-snow'></i>");
-			break;
-		/* Clear or clouds */
-		case 8:
-			/* Overcast */
-			if (code == 803 || code == 804) {
-				$("body").css({"background-color" : "#adad85"});
-				$("#icon").html("<i class='wi wi-cloudy'></i>");
-			}
-			else {
-				$("body").css({"background-color":"#0099cc"});
-				$("#icon").html("<i class='wi wi-day-sunny'></i>");
-			}
-			break;
-			}
+            $("body").css({"background-color": "#FF0000"});
+            break;
+        // Drizzle and rain
+        case 3:
+        case 5:
+            $("body").css({"background-color": "#666699"});
+            break;
+        // Snow
+        case 6:
+            $("body").css({"background-color": "#669999"});
+            break;
+        // Clear or Clouds
+        case 8:
+            // Clear
+            if (code == 800) {
+                $("body").css({"background-color": "#ADAD85"});
+            }
+            // Overcase
+            else {
+                $("body").css({"background-color": "#0099CC"});
+            }
+            break;
+        default:
+            $("body").css({"background-color": "grey"});
+    }
 }
 
 $(document).ready(function() {
-	
-	/* Set up the screen, get the weather, etc... */
-	getPosition();
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(updateWeather);
+    }
+    else {
+        $("#location").html("Geolocation is not supported :(");
+    }
 
-	/* Toggling the units */
-	var imperial = true;
-	$("#unit").click(function() {
-		if (imperial) {
-			imperial = false;
-			var ftemp = Number($("#temp").text());
-			var ctemp = fahrToCelsius(ftemp);
-			$("#temp").html(ctemp);
-			$("#unit").html('&#8451');
-		}
-		else {
-			imperial = true;
-			var ctemp = Number($("#temp").text());
-			var ftemp = celsiusToFahr(ctemp);
-			$("#temp").html(ftemp);
-			$("#unit").html('&#8457');
-		}
-	});
+    // Unit switching
+    var imperial = false;
+    $("#unit").click(function() {
+        var ftemp;
+        var ctemp;
+        if (imperial) {
+            imperial = false;
+            ftemp = Number($("#temp").text());
+            ctemp = fahrToCelsius(ftemp);
+            $("#temp").html(ctemp);
+            $("#unit").html(' &#8451');
+        }
+        else {
+            imperial = true;
+            ctemp = Number($("#temp").text());
+            ftemp = celsiusToFahr(ctemp);
+            $("#temp").html(ftemp);
+            $("#unit").html(' &#8457');
+        }
+    });
 });

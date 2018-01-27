@@ -1,15 +1,18 @@
-h1 {
-    font-size: 4em;
+.myTransparent {
+    background-color: rgba(255,255,255,0.5);
+    color: inherit;
+}
+
+body {
+    background-color: grey;
 }
 
 header {
-    padding-top: 25px;
-    padding-bottom: 10px;
-    background-color: #ffffff;
-    opacity: 0.5;
+    margin-top: 30px;
+    margin-bottom: 30px;
 }
 
-#main {
-    padding-top: 25px;
+footer {
+    margin-top: 30px;
+    margin-bottom: 10px;
 }
-
